@@ -1,0 +1,45 @@
+version: "3.8"
+services:
+  client-menu-frontend:
+    build:
+      context: ./booking-app/frontend
+    container_name: client-menu-frontend
+    ports:
+      - "3001:3001"
+    networks:
+      - booking-network
+  client-menu-admin:
+    build:
+      context: ./booking-app/admin
+    container_name: client-menu-admin
+    ports:
+      - "3002:3002"
+    networks:
+      - booking-network
+  client-menu-postgres:
+    image: postgres:16-alpine
+    container_name: client-menu-postgres
+    environment:
+      POSTGRES_USER: bookinguser
+      POSTGRES_PASSWORD: bookingpass
+      POSTGRES_DB: bookingdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - booking-network
+  client-menu-backend:
+    build:
+      context: ./booking-app/backend
+    container_name: client-menu-backend
+    ports:
+      - "5003:5001"
+    environment:
+      DATABASE_URL: postgresql://bookinguser:bookingpass@client-menu-postgres:5432/bookingdb
+      NODE_ENV: production
+    networks:
+      - booking-network
+volumes:
+  postgres_data:
+networks:
+  booking-network:
+    driver: bridge
